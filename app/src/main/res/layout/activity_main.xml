@@ -95,7 +95,7 @@
         android:fontFamily="@font/roboto"
         android:text="Sign Up"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        app:backgroundTint="@color/purple_500"
+        app:backgroundTint="#673AB7"
         android:textSize="25dp" />
 
 </LinearLayout>
