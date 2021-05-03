@@ -25,12 +25,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.auth.User;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText emailEt,passwordEt1;
+    private EditText emailEt, passwordEt1;
     private Button SignUpButton;
     private Button signInButton;
-    private ProgressDialog progressDialog;
-    private FirebaseAuth firebaseAuth;
-    private DatabaseReference mDatabase;
+    //    private ProgressDialog progressDialog;
+    private FirebaseAuth mAuth;
+//    private DatabaseReference mDatabase;
 
 
     @Override
@@ -43,13 +43,15 @@ public class SignUpActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         setContentView(R.layout.activity_sign_up);
-        firebaseAuth=FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance("https://hungryapp-d791e-default-rtdb.firebaseio.com/").getReference();
-        emailEt=findViewById(R.id.email);
-        passwordEt1=findViewById(R.id.password1);
-        SignUpButton=findViewById(R.id.register);
+
+        mAuth = FirebaseAuth.getInstance();
+//        mDatabase = FirebaseDatabase.getInstance("https://hungryapp-d791e-default-rtdb.firebaseio.com/").getReference();
+
+        emailEt = findViewById(R.id.email);
+        passwordEt1 = findViewById(R.id.password1);
+        SignUpButton = findViewById(R.id.register);
         signInButton = findViewById(R.id.loginBtn);
-        progressDialog=new ProgressDialog(this);
+//        progressDialog=new ProgressDialog(this);
         SignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,53 +62,49 @@ public class SignUpActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(SignUpActivity.this,MainActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                 finish();
             }
         });
     }
 
-    private void Register(){
-        String email=emailEt.getText().toString();
-        String password1=passwordEt1.getText().toString();
-        if(TextUtils.isEmpty(email)){
+    private void Register() {
+        String email = emailEt.getText().toString();
+        String password1 = passwordEt1.getText().toString();
+        if (TextUtils.isEmpty(email)) {
             emailEt.setError("Enter your email");
-            return;
-        }
-        else if(TextUtils.isEmpty(password1)){
+            emailEt.requestFocus();
+        } else if (TextUtils.isEmpty(password1)) {
             passwordEt1.setError("Enter your password");
-            return;
-        }
-        else if(password1.length()<4){
+            passwordEt1.requestFocus();
+        } else if (password1.length() < 4) {
             passwordEt1.setError("Length should be > 4");
             return;
-        }
-        else if(!isValidEmail(email)){
+        } else if (!isValidEmail(email)) {
             emailEt.setError("invalid email");
-            return;
-        }
-        progressDialog.setMessage("Please wait...");
-        progressDialog.show();
-        progressDialog.setCanceledOnTouchOutside(false);
-        firebaseAuth.createUserWithEmailAndPassword(email,password1).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()){
-                    // save to database
+            emailEt.requestFocus();
+        } else {
+            //        progressDialog.setMessage("Please wait...");
+//        progressDialog.show();
+//        progressDialog.setCanceledOnTouchOutside(false);
+            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        // save to database
 //                    writeNewUser(task.getResult().getUser());
-                    // notify success
-                    Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
-                    Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
-                    startActivity(intent);
-                    finish();
+                        // notify success
+                        Toast.makeText(SignUpActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(SignUpActivity.this, DashboardActivity.class));
+                        finish();
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Sign up fail!", Toast.LENGTH_LONG).show();
+                    }
+//                progressDialog.dismiss();
                 }
-                else{
-                    Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
-                }
-                progressDialog.dismiss();
-            }
-        });
+            });
+        }
+
     }
 
 //    private void writeNewUser(FirebaseUser user){
@@ -114,7 +112,7 @@ public class SignUpActivity extends AppCompatActivity {
 //        mDatabase.child("users").child(user.getUid()).setValue(dbUser);
 //    }
 
-    private Boolean isValidEmail(CharSequence target){
+    private Boolean isValidEmail(CharSequence target) {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 }

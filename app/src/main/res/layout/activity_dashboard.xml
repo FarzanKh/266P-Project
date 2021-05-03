@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#5272ff"
+    android:orientation="vertical"
     android:paddingHorizontal="30dp"
     tools:context=".DashboardActivity">
 
@@ -54,41 +54,58 @@
         <ImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginLeft="10dp"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
+            android:layout_marginLeft="10dp"
             android:background="@drawable/money" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/withdrawButton"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="166dp"
-        android:layout_height="60dp"
-        android:fontFamily="@font/roboto"
-        android:text="Withdraw"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="#5272ff"
-        android:textSize="25dp"
-        app:backgroundTint="#ECECEC" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/depositButton"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="166dp"
-        android:layout_height="60dp"
-        android:fontFamily="@font/roboto"
-        android:text="Deposit"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="#5272ff"
-        android:textSize="25dp"
-        app:backgroundTint="#ECECEC" />
+        <Button
+            android:id="@+id/withdrawButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="140dp"
+            android:layout_height="60dp"
+            android:fontFamily="@font/roboto"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:text="Withdraw"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display4"
+            android:textColor="#5272ff"
+            android:textSize="25dp"
+            app:backgroundTint="#ECECEC" />
+
+        <Button
+            android:id="@+id/depositButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="140dp"
+            android:layout_height="60dp"
+            android:fontFamily="@font/roboto"
+            android:text="Deposit"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display4"
+            android:textColor="#5272ff"
+            android:textSize="25dp"
+            app:backgroundTint="#ECECEC" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/button6"
-        app:backgroundTint="#A6A6A6"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="100dp"
+        android:text="Share Your Balance"
+        app:backgroundTint="#A6A6A6" />
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Share Your Balance"/>
+        android:text="Button" />
 
 </LinearLayout>
