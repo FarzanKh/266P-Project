@@ -22,7 +22,7 @@
         android:layout_marginTop="40dp">
 
         <EditText
-            android:id="@+id/password1"
+            android:id="@+id/emailSignUp"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp">
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/passwordSignUp"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:hint="Enter your password..."
@@ -66,7 +66,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/register"
+        android:id="@+id/registerBtn"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="166dp"
         android:layout_height="60dp"
@@ -89,7 +89,7 @@
         android:textSize="18dp" />
 
         <Button
-            android:id="@+id/loginBtn"
+            android:id="@+id/signInBtn"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="166dp"
             android:layout_height="60dp"

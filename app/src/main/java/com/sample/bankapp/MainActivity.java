@@ -2,7 +2,6 @@ package com.sample.bankapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,7 +10,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,11 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
-        emailEt = findViewById(R.id.email);
-        passwordEt = findViewById(R.id.password);
-        SignInButton = findViewById(R.id.loginBtn);
-//        progressDialog = new ProgressDialog(this);
+        emailEt = findViewById(R.id.emailSignIn);
+        passwordEt = findViewById(R.id.passwordSignIn);
+        SignInButton = findViewById(R.id.signInBtn);
         SignUpBtn = findViewById(R.id.signUpBtn);
+//        progressDialog = new ProgressDialog(this);
+
         SignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,10 +53,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, SignUpActivity.class));
-//                finish();
+                finish();
             }
         });
-
     }
 
 
@@ -88,6 +86,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
 }

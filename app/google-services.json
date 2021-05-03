@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "488507462177",
+    "firebase_url": "https://bankapp-d5b61-default-rtdb.firebaseio.com",
     "project_id": "bankapp-d5b61",
     "storage_bucket": "bankapp-d5b61.appspot.com"
   },
