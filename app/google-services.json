@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "952828005875",
-    "project_id": "bankapp-42ed8",
-    "storage_bucket": "bankapp-42ed8.appspot.com"
+    "project_number": "488507462177",
+    "project_id": "bankapp-d5b61",
+    "storage_bucket": "bankapp-d5b61.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:952828005875:android:5c91d9eee5299b8c62d686",
+        "mobilesdk_app_id": "1:488507462177:android:61a598c697d898f38b8960",
         "android_client_info": {
           "package_name": "com.sample.bankapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "952828005875-kem2uldh31ulfgrv31areochm980fkin.apps.googleusercontent.com",
+          "client_id": "488507462177-kh016dr9plnfkt5r9qeot67id22ve1vo.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyATZDCVxu8m4xOpQ5L-cL9stcpgD1ivT5I"
+          "current_key": "AIzaSyALt_cxVie480dA-0ZVYDh_dp8TZK9anJY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "952828005875-kem2uldh31ulfgrv31areochm980fkin.apps.googleusercontent.com",
+              "client_id": "488507462177-kh016dr9plnfkt5r9qeot67id22ve1vo.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
