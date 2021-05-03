@@ -20,12 +20,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
     private EditText emailEt,passwordEt;
     private Button SignInButton;
-    private TextView SignUpTv;
+    private TextView SignUpBtn;
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
     @Override
@@ -40,16 +39,17 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth=FirebaseAuth.getInstance();
         emailEt=findViewById(R.id.email);
         passwordEt=findViewById(R.id.password);
-        SignInButton=findViewById(R.id.login);
+        SignInButton=findViewById(R.id.loginBtn);
         progressDialog=new ProgressDialog(this);
-        SignUpTv=findViewById(R.id.signUpBtn);
+        SignUpBtn=findViewById(R.id.signUpBtn);
         SignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Login();
             }
         });
-        SignUpTv.setOnClickListener(new View.OnClickListener() {
+
+        SignUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MainActivity.this,SignUpActivity.class);
@@ -58,6 +58,19 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+
+//        findViewById(R.id.signUpBtn).setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent();
+//                intent.setAction("signUp");
+//                intent.addCategory("android.intent.category.DEFAULT");
+//
+//                startActivity(intent);
+//            }
+//        });
     }
 
 
