@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -69,14 +70,15 @@ public class SignUpActivity extends AppCompatActivity {
     private void Register() {
         String email = emailField.getText().toString();
         String password = passwordField.getText().toString();
+
         if (TextUtils.isEmpty(email)) {
             emailField.setError("Enter your email");
             emailField.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordField.setError("Enter your password");
             passwordField.requestFocus();
-        } else if (password.length() < 4) {
-            passwordField.setError("Length should be > 4");
+        } else if (password.length() < 6) {
+            passwordField.setError("Length should be > 6");
             passwordField.requestFocus();
         } else if (!isValidEmail(email)) {
             emailField.setError("invalid email");
@@ -94,15 +96,15 @@ public class SignUpActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     } else {
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
                     }
 
                 }
             });
-//                progressDialog.dismiss();
+ //               progressDialog.dismiss();
         }
     }
-
 
     private void writeNewUser(FirebaseUser user) {
         User dbUser = new User(user.getEmail());
@@ -113,3 +115,4 @@ public class SignUpActivity extends AppCompatActivity {
         return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 }
+
