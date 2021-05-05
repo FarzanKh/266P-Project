@@ -8,12 +8,12 @@
     android:orientation="vertical"
     android:background="#5272ff"
     android:paddingHorizontal="30dp"
-    tools:context=".MainActivity">
+    tools:context=".SignUpActivity">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="286dp"
+        android:layout_height="126dp"
         app:srcCompat="@drawable/resizedbank" />
 
     <RelativeLayout
@@ -22,40 +22,40 @@
         android:layout_marginTop="40dp">
 
         <EditText
-            android:id="@+id/emailSignIn"
+            android:id="@+id/emailSignUp"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"
-            android:fontFamily="@font/roboto"
             android:hint="Enter your email..."
             android:inputType="textEmailAddress"
             android:paddingVertical="15dp"
             android:paddingLeft="60dp"
             android:textColor="#000000" />
+
         <ImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/email"
+            android:background="@drawable/profile"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp">
-
         <EditText
-            android:id="@+id/passwordSignIn"
+            android:id="@+id/passwordSignUp"
             android:layout_width="match_parent"
             android:layout_height="65dp"
-            android:background="@drawable/rectangular_field"
-            android:fontFamily="@font/roboto"
             android:hint="Enter your password..."
-            android:inputType="textPassword"
             android:paddingVertical="15dp"
+            android:textColor="#000000"
+            android:inputType="textPassword"
             android:paddingLeft="60dp"
-            android:textColor="#000000" />
+            android:background="@drawable/rectangular_field"/>
+
         <ImageView
             android:layout_width="35dp"
             android:layout_height="35dp"
@@ -66,40 +66,39 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/signInBtn"
+        android:id="@+id/registerBtn"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="166dp"
         android:layout_height="60dp"
         android:layout_marginTop="30dp"
         android:fontFamily="@font/roboto"
-        android:text="Sign In"
+        android:text="Sign Up"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="#5272ff"
+        android:textColor="#5272FF"
         android:textSize="25dp"
         app:backgroundTint="#ECECEC" />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:fontFamily="@font/roboto"
-        android:text="Don’t have an account yet?"
+        android:text="Already have an account?"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="#FFFFFF"
+        android:textColor="#ECECEC"
         android:textSize="18dp" />
 
-    <Button
-        android:id="@+id/signUpBtn"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="166dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="10dp"
-        android:fontFamily="@font/roboto"
-        android:text="Sign Up"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="#5272ff"
-        android:textSize="25dp"
-        app:backgroundTint="#ECECEC"
-        app:iconTint="#000000" />
+        <Button
+            android:id="@+id/signInBtn"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="166dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/roboto"
+            android:text="Sign In"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+            android:textColor="#5272ff"
+            android:textSize="25dp"
+            app:backgroundTint="#ECECEC" />
 
 </LinearLayout>
