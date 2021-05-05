@@ -15,7 +15,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_TABLE = "Bank_Table";
     private static final int DB_VERSION2 = 2;
 
-    public static final String COL_ITEM = "item";
+    //The key to access the balance (value)
+    public static final String COL_ITEM = "balance";
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -23,81 +24,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(item VARCHAR);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(balance int);");
     }
 
-    //Method gets all of the data from the database
-    public ArrayList<String> getAllItems() {
+    //Method gets the balance from the database
+    public int getBalance() {
 
-        ArrayList<String> array_list = new ArrayList<String>();
+        int result_balance = 0;
+        int item = 0;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(item VARCHAR);");
-        Cursor res =  db.rawQuery( "select * from Bank_Table", null );
+        //db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(balance int);");
+        Cursor res =  db.rawQuery( "select balance from Bank_Table", null );
         res.moveToFirst();
 
         while(res.isAfterLast() == false){
-            String full_item = res.getString(res.getColumnIndex(COL_ITEM)) + " ";
-            array_list.add(full_item);
+            item = res.getInt(res.getColumnIndex(COL_ITEM));
             res.moveToNext();
         }
-        return array_list;
+        System.out.println(" get BALANCE "+ item);
+
+        result_balance = item;
+        return result_balance;
     }
 
+    //changes the balance in the database
+    public boolean changeBalance (int new_balance) {
+        System.out.println("What is the new balance"+ new_balance);
 
-    public boolean insertItem (String item) {
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_ITEM, item);
+        contentValues.put(COL_ITEM, new_balance);
 
         db.insert(DB_TABLE, null, contentValues);
         return true;
     }
 
-    public void deleteItem (String task) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(DB_TABLE,
-                "item = ? ",
-                new String[] { task });
-    }
 
-    public ArrayList<String> searchItems(String searchQuery) {
-        ArrayList<String> result = new ArrayList<String>();
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor c = db.query(DB_TABLE,
-                new String[] {"item"},
-                COL_ITEM + " LIKE '%" + searchQuery + "%' ", null, null, null,
-                null);
-
-        int iRow = c.getColumnIndex(COL_ITEM); //Cursor looking for column setting equal to these ints.
-
-        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-            result.add(c.getString(iRow));
-        }
-
-        return result;
-    }
-
-
-//    public ArrayList<String> sortItems() {
+//    public ArrayList<String> searchItems(String searchQuery) {
 //        ArrayList<String> result = new ArrayList<String>();
 //        SQLiteDatabase db = this.getWritableDatabase();
-//        Cursor c = db.query(DB_TABLE,
-//                new String[] {"item"},
-//                null, null, null, null,
-//                "item ASC");
 //
-//        int iRow = c.getColumnIndex(COL_ITEM);
+//        Cursor c = db.query(DB_TABLE,
+//                new String[] {"balance"},
+//                COL_ITEM + " LIKE '%" + searchQuery + "%' ", null, null, null,
+//                null);
+//
+//        int iRow = c.getColumnIndex(COL_ITEM); //Cursor looking for column setting equal to these ints.
 //
 //        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-//            System.out.println("TABLE ITEM AFTER SORT: "+ c.getString(iRow));
 //            result.add(c.getString(iRow));
 //        }
 //
 //        return result;
 //    }
+
+
 
 
     @Override
