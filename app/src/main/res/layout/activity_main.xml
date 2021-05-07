@@ -12,8 +12,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="286dp"
+        android:layout_height="100dp"
         app:srcCompat="@drawable/resizedbank" />
 
     <RelativeLayout
@@ -36,14 +36,14 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/email"
+            android:background="@drawable/profile_icon"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="20dp">
 
         <EditText
             android:id="@+id/passwordSignIn"
@@ -60,7 +60,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/password"
+            android:background="@drawable/lock_icon"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
