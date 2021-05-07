@@ -13,7 +13,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="286dp"
-        android:layout_height="126dp"
+        android:layout_height="100dp"
         app:srcCompat="@drawable/resizedbank" />
 
     <RelativeLayout
@@ -36,7 +36,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/profile"
+            android:background="@drawable/email_icon"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
@@ -44,7 +44,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="20dp">
         <EditText
             android:id="@+id/passwordSignUp"
             android:layout_width="match_parent"
@@ -60,7 +60,32 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="10dp"
-            android:background="@drawable/password"
+            android:background="@drawable/lock_icon"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <EditText
+            android:id="@+id/initialAmount"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="@drawable/rectangular_field_amount"
+            android:hint="Enter your initial balance..."
+            android:inputType="text"
+            android:paddingVertical="15dp"
+            android:paddingLeft="60dp"
+            android:textColor="#000000" />
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/money_icon"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
