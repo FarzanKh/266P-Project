@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -18,6 +20,7 @@ public class DashboardActivity extends AppCompatActivity {
     Button logoutBtn;
     FirebaseAuth mAuth;
     EditText amount;
+    TextView ui_balance;
 
     private static DatabaseHelper mydb ;
 
@@ -28,8 +31,37 @@ public class DashboardActivity extends AppCompatActivity {
 
         logoutBtn = findViewById(R.id.logoutBtn);
         amount = findViewById(R.id.editTextNumberDecimal);
+        ui_balance = findViewById(R.id.balance);
 
+        //Initialize DB
         mAuth = FirebaseAuth.getInstance();
+        mydb = new DatabaseHelper(this);
+
+
+        //*******************************************************************************
+
+        //Get user UID from firebase
+        String currentuserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        //Get User balance from sign up page
+        String user_balance = getIntent().getStringExtra("USER_BALANCE");
+
+        //Make sure it's Sign up page that these values are valid
+        if(user_balance != null) {
+            int int_balance = Integer.parseInt(user_balance);
+
+            //Set user id in db
+            mydb.setUserId(currentuserID);
+
+            //Set db balance to user's initial amount
+            initial_DB_Deposit(int_balance);
+        }
+
+        int starting_balance = getCurrentBalance();
+        ui_balance.setText("$" + starting_balance);
+
+        //*******************************************************************************
+
 
         logoutBtn.setOnClickListener(view -> {
             mAuth.signOut();
@@ -50,9 +82,24 @@ public class DashboardActivity extends AppCompatActivity {
     /** Called when the user touches the button */
     public void withdrawAmount(View view) {
         // Do something in response to button click
-        System.out.println("WHAT IS THE AMOUNT IN ET WITHDRAW" + amount);
+        int transaction_result = 0;
 
+        String new_amount = amount.getText().toString();
 
+        if(new_amount.equals("")) {
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            int int_amount = Integer.parseInt(new_amount);
+            transaction_result = bankTransaction(int_amount, "w");
+        }
+
+        //checks if balance is 0
+        if (transaction_result ==  -1) {
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
+        } else {
+            ui_balance.setText("$" + String.valueOf(transaction_result));
+        }
     }
 
 
@@ -60,53 +107,67 @@ public class DashboardActivity extends AppCompatActivity {
     /** Called when the user touches the button */
     public void depositAmount(View view) {
         // Do something in response to button click
-        System.out.println("WHAT IS THE AMOUNT IN ET DEPOSIT" + amount);
+        int transaction_result = 0;
+        String new_amount = amount.getText().toString();
+
+        if(new_amount.equals("")) {
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid amount", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            int int_amount = Integer.parseInt(new_amount);
+            transaction_result = bankTransaction(int_amount, "w");
+        }
+
+        int int_amount = Integer.parseInt(new_amount);
+
+        transaction_result = bankTransaction(int_amount, "d");
+        ui_balance.setText("$" + String.valueOf(transaction_result));
 
     }
 
 
+    public static void initial_DB_Deposit(int deposit) {
+        boolean dbResult = mydb.changeBalance(deposit);
+    }
 
-    //Methods to make changes to the database
-    public static ArrayList<String> getAll() {
-        ArrayList<String> result = new ArrayList<String>();
-        result = mydb.getAllItems();
+
+    //gets the current bank balance from database
+    public static int getCurrentBalance() {
+        int result = mydb.getBalance();
         return result;
     }
 
+    //checks the transaction type and changes the balance on the database
+    public static int bankTransaction(int transaction_amount, String transaction_type) {
+        int result_balance = 0;
+        int curr_balance = getCurrentBalance();
+        int new_balance = 0;
 
-    public static ArrayList<String> depositMoney(String item) {
-        ArrayList<String> todo_list = new ArrayList<String>();
+        if(transaction_type == "w") {
+            new_balance = curr_balance - transaction_amount;
 
-        boolean result = mydb.insertItem(item);
+            //checks if new balance is more than $0
+            if (new_balance < 0 ){
+                return -1;
+            } else {
+                boolean dbResult = mydb.changeBalance(new_balance);
+                if(dbResult){
+                    result_balance = new_balance;
+                }
 
-        if(result) {
-            todo_list = mydb.getAllItems();
+            }
 
+        } else if (transaction_type == "d") {
+            new_balance = curr_balance + transaction_amount;
+            boolean dbResult = mydb.changeBalance(new_balance);
+            if(dbResult){
+                result_balance = new_balance;
+            }
         }
-        return todo_list;
+
+        return result_balance;
     }
 
-
-    public static ArrayList<String> withdrawMoney(String item) {
-        ArrayList<String> todo_list = new ArrayList<String>();
-
-        boolean result = mydb.insertItem(item);
-
-        if(result) {
-            todo_list = mydb.getAllItems();
-
-        }
-        return todo_list;
-    }
-
-
-
-    public static ArrayList<String> searchWorkout(String task) {
-        ArrayList<String> todo_list = new ArrayList<String>();
-
-        todo_list = mydb.searchItems(task);
-        return todo_list;
-    }
 
 
 
