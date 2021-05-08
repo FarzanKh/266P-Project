@@ -25,7 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText emailField, passwordField;
+    private EditText emailField, passwordField, initialAmount;
     private Button SignUpButton;
     private Button signInButton;
     private FirebaseAuth mAuth;
@@ -44,13 +44,16 @@ public class SignUpActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_sign_up);
 
+        emailField = findViewById(R.id.emailSignUp);
+        passwordField = findViewById(R.id.passwordSignUp);
+        initialAmount = findViewById(R.id.initialAmount);
+        SignUpButton = findViewById(R.id.registerBtn);
+        signInButton = findViewById(R.id.signInBtn);
+
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance("https://bankapp-d5b61-default-rtdb.firebaseio.com/").getReference();
 
-        emailField = findViewById(R.id.emailSignUp);
-        passwordField = findViewById(R.id.passwordSignUp);
-        SignUpButton = findViewById(R.id.registerBtn);
-        signInButton = findViewById(R.id.signInBtn);
+
         SignUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,6 +73,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void Register() {
         String email = emailField.getText().toString();
         String password = passwordField.getText().toString();
+        String initial_balance = initialAmount.getText().toString();
 
         if (TextUtils.isEmpty(email)) {
             emailField.setError("Enter your email");
@@ -77,6 +81,9 @@ public class SignUpActivity extends AppCompatActivity {
         } else if (TextUtils.isEmpty(password)) {
             passwordField.setError("Enter your password");
             passwordField.requestFocus();
+        } else if (TextUtils.isEmpty(initial_balance)) {
+            initialAmount.setError("Enter your initial balance");
+            initialAmount.requestFocus();
         } else if (password.length() < 6) {
             passwordField.setError("Length should be > 6");
             passwordField.requestFocus();
@@ -93,6 +100,7 @@ public class SignUpActivity extends AppCompatActivity {
                         writeNewUser(task.getResult().getUser());
                         Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
                         Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
+                        intent.putExtra("USER_BALANCE", initial_balance);
                         startActivity(intent);
                         finish();
                     } else {

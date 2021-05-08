@@ -15,16 +15,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_TABLE = "Bank_Table";
     private static final int DB_VERSION2 = 2;
 
-    //The key to access the balance (value)
-    public static final String COL_ITEM = "balance";
+    //The key to access the balance (value) and user_id
+    public static final String COL_ITEM1 = "balance";
+    public static final String COL_ITEM2 = "user_id";
+
 
     DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(balance int);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(user_id varchar, balance int);");
     }
 
     //Method gets the balance from the database
@@ -40,7 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         res.moveToFirst();
 
         while(res.isAfterLast() == false){
-            item = res.getInt(res.getColumnIndex(COL_ITEM));
+            item = res.getInt(res.getColumnIndex(COL_ITEM1));
             res.moveToNext();
         }
         System.out.println(" get BALANCE "+ item);
@@ -56,31 +57,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_ITEM, new_balance);
+        contentValues.put(COL_ITEM1, new_balance);
 
         db.insert(DB_TABLE, null, contentValues);
         return true;
     }
 
 
-//    public ArrayList<String> searchItems(String searchQuery) {
-//        ArrayList<String> result = new ArrayList<String>();
-//        SQLiteDatabase db = this.getWritableDatabase();
-//
-//        Cursor c = db.query(DB_TABLE,
-//                new String[] {"balance"},
-//                COL_ITEM + " LIKE '%" + searchQuery + "%' ", null, null, null,
-//                null);
-//
-//        int iRow = c.getColumnIndex(COL_ITEM); //Cursor looking for column setting equal to these ints.
-//
-//        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-//            result.add(c.getString(iRow));
-//        }
-//
-//        return result;
-//    }
+    public boolean setUserId(String userId){
 
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_ITEM2, userId);
+
+        db.insert(DB_TABLE, null, contentValues);
+        return true;
+    }
 
 
 
