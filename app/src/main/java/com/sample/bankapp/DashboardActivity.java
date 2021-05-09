@@ -115,12 +115,10 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         } else {
             int int_amount = Integer.parseInt(new_amount);
-            transaction_result = bankTransaction(int_amount, "w");
+            transaction_result = bankTransaction(int_amount, "d");
         }
 
         int int_amount = Integer.parseInt(new_amount);
-
-        transaction_result = bankTransaction(int_amount, "d");
         ui_balance.setText("$" + String.valueOf(transaction_result));
 
     }
