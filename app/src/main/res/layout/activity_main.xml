@@ -102,4 +102,18 @@
         app:backgroundTint="#ECECEC"
         app:iconTint="#000000" />
 
+    <Button
+        android:id="@+id/callSupport"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="166dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/roboto"
+        android:text="Customer Service"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        android:textColor="#5272ff"
+        android:textSize="15dp"
+        app:backgroundTint="#ECECEC"
+        app:iconTint="#000000" />
+
 </LinearLayout>
