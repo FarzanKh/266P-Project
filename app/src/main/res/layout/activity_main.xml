@@ -27,8 +27,8 @@
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"
             android:fontFamily="@font/roboto"
-            android:hint="Enter your email..."
-            android:inputType="textEmailAddress"
+            android:hint="Enter your username..."
+            android:inputType="text"
             android:paddingVertical="15dp"
             android:paddingLeft="60dp"
             android:textColor="#000000" />
