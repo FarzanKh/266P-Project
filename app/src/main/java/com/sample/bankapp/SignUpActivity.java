@@ -24,6 +24,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.regex.Pattern;
+
 public class SignUpActivity extends AppCompatActivity {
     private EditText emailField, passwordField, initialAmount;
     private Button SignUpButton;
@@ -31,6 +33,7 @@ public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private static final String TAG = "SignUp - Activity";
+    private static final double MAX_INPUT = 4294967295.99;
 
 
     @Override
@@ -71,26 +74,12 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void Register() {
+        // todo: change email and emailField to username
         String email = emailField.getText().toString();
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
-        if (TextUtils.isEmpty(email)) {
-            emailField.setError("Enter your email");
-            emailField.requestFocus();
-        } else if (TextUtils.isEmpty(password)) {
-            passwordField.setError("Enter your password");
-            passwordField.requestFocus();
-        } else if (TextUtils.isEmpty(initial_balance)) {
-            initialAmount.setError("Enter your initial balance");
-            initialAmount.requestFocus();
-        } else if (password.length() < 6) {
-            passwordField.setError("Length should be > 6");
-            passwordField.requestFocus();
-        } else if (!isValidEmail(email)) {
-            emailField.setError("invalid email");
-            emailField.requestFocus();
-        } else {
+        if (validateInputs(email, password, initial_balance)) {
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -112,6 +101,23 @@ public class SignUpActivity extends AppCompatActivity {
             });
  //               progressDialog.dismiss();
         }
+    }
+
+    private boolean validateInputs(String email, String password, String initial_balance) {
+        // todo: change email and emailField to username
+        if (!Pattern.matches("[_\\-\\.0-9a-z]{1,127}",email)) {
+            emailField.setError("Invalid username");
+            emailField.requestFocus();
+        } else if (!Pattern.matches("[_\\-\\.0-9a-z]{0,127}",password)) {
+            passwordField.setError("Invalid password");
+            passwordField.requestFocus();
+        } else if (!Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance) || Double.parseDouble(initial_balance) > MAX_INPUT) {
+            initialAmount.setError("Invalid initial balance");
+            initialAmount.requestFocus();
+        } else {
+            return true;
+        }
+        return false;
     }
 
     private void writeNewUser(FirebaseUser user) {
