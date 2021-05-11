@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Login Successfully", Toast.LENGTH_LONG).show();
                         // startActivity(new Intent(MainActivity.this, DashboardActivity.class));
                         Intent intent = new Intent();
-                        intent.setAction("Dashboard");
+                        intent.setAction("DashBoard");
                         intent.addCategory("android.intent.category.DEFAULT");
                         startActivity(intent);
                         finish();
