@@ -20,12 +20,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText emailField, passwordField, initialAmount;
+    private EditText usernameField, passwordField, initialAmount;
     private Button SignUpButton;
     private Button signInButton;
     private FirebaseAuth mAuth;
@@ -44,40 +43,30 @@ public class SignUpActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_sign_up);
 
-        emailField = findViewById(R.id.emailSignUp);
+        usernameField = findViewById(R.id.usernameSignUp);
         passwordField = findViewById(R.id.passwordSignUp);
         initialAmount = findViewById(R.id.initialAmount);
         SignUpButton = findViewById(R.id.registerBtn);
         signInButton = findViewById(R.id.signInBtn);
 
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance("https://bankapp-d5b61-default-rtdb.firebaseio.com/").getReference();
 
+        SignUpButton.setOnClickListener(v -> Register());
 
-        SignUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Register();
-            }
-        });
-
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                finish();
-            }
+        signInButton.setOnClickListener(v -> {
+            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+            finish();
         });
     }
 
     private void Register() {
-        String email = emailField.getText().toString();
+        String email = usernameField.getText().toString();
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
         if (TextUtils.isEmpty(email)) {
-            emailField.setError("Enter your email");
-            emailField.requestFocus();
+            usernameField.setError("Enter your email");
+            usernameField.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordField.setError("Enter your password");
             passwordField.requestFocus();
@@ -87,17 +76,13 @@ public class SignUpActivity extends AppCompatActivity {
         } else if (password.length() < 6) {
             passwordField.setError("Length should be > 6");
             passwordField.requestFocus();
-        } else if (!isValidEmail(email)) {
-            emailField.setError("invalid email");
-            emailField.requestFocus();
         } else {
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "It was successful");
-                        // save to database
-                        writeNewUser(task.getResult().getUser());
+
                         Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
                         Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
                         intent.putExtra("USER_BALANCE", initial_balance);
@@ -110,17 +95,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                 }
             });
- //               progressDialog.dismiss();
         }
-    }
-
-    private void writeNewUser(FirebaseUser user) {
-        User dbUser = new User(user.getEmail());
-        mDatabase.child("users").child(user.getUid()).setValue(dbUser);
-    }
-
-    private Boolean isValidEmail(CharSequence target) {
-        return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 }
 

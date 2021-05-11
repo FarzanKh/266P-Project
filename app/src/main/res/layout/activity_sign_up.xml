@@ -22,7 +22,7 @@
         android:layout_marginTop="40dp">
 
         <EditText
-            android:id="@+id/emailSignUp"
+            android:id="@+id/usernameSignUp"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field"

@@ -24,7 +24,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText emailEt, passwordEt;
+    private EditText usernameEt, passwordEt;
     private Button SignInButton;
     private Button SignUpBtn;
 //    private ProgressDialog progressDialog;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
-        emailEt = findViewById(R.id.emailSignIn);
+        usernameEt = findViewById(R.id.usernameSignIn);
         passwordEt = findViewById(R.id.passwordSignIn);
         SignInButton = findViewById(R.id.signInBtn);
         SignUpBtn = findViewById(R.id.signUpBtn);
@@ -80,11 +80,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void Login() {
-        String email = emailEt.getText().toString();
+        String email = usernameEt.getText().toString();
         String password = passwordEt.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            emailEt.setError("Enter your email");
-            emailEt.requestFocus();
+            usernameEt.setError("Enter your email");
+            usernameEt.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordEt.setError("Enter your password");
             passwordEt.requestFocus();
