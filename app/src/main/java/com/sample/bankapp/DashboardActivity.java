@@ -38,7 +38,6 @@ public class DashboardActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mydb = new DatabaseHelper(this);
 
-
         //*******************************************************************************
 
         //Get user UID from firebase
@@ -49,16 +48,16 @@ public class DashboardActivity extends AppCompatActivity {
 
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
-            int int_balance = Integer.parseInt(user_balance);
 
             //Set user id in db
             mydb.setUserId(currentuserID);
 
             //Set db balance to user's initial amount
-            initial_DB_Deposit(int_balance);
+            initial_DB_Deposit(user_balance);
         }
 
-        int starting_balance = getCurrentBalance();
+        double starting_balance = getCurrentBalance();
+
         ui_balance.setText("$" + starting_balance);
 
         //*******************************************************************************
@@ -83,7 +82,7 @@ public class DashboardActivity extends AppCompatActivity {
     /** Called when the user touches the button */
     public void withdrawAmount(View view) {
         // Do something in response to button click
-        int transaction_result = 0;
+        double transaction_result = 0;
 
         String new_amount = amount.getText().toString();
 
@@ -91,8 +90,8 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            int int_amount = Integer.parseInt(new_amount);
-            transaction_result = bankTransaction(int_amount, "w");
+            double d_amount = Double.parseDouble(new_amount);
+            transaction_result = bankTransaction(d_amount, "w");
         }
 
         //checks if balance is 0
@@ -108,7 +107,7 @@ public class DashboardActivity extends AppCompatActivity {
     /** Called when the user touches the button */
     public void depositAmount(View view) {
         // Do something in response to button click
-        int transaction_result = 0;
+        double transaction_result = 0;
         String new_amount = amount.getText().toString();
         // todo: delete later:
         validateAmount(new_amount);
@@ -117,11 +116,12 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid amount", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            int int_amount = Integer.parseInt(new_amount);
-            transaction_result = bankTransaction(int_amount, "d");
+            double d_amount = Double.parseDouble(new_amount);
+            transaction_result = bankTransaction(d_amount, "d");
         }
 
         ui_balance.setText("$" + String.valueOf(transaction_result));
+
     }
 
     public int validateAmount(String amount) {
@@ -133,22 +133,23 @@ public class DashboardActivity extends AppCompatActivity {
         return 0;
     }
 
-    public static void initial_DB_Deposit(int deposit) {
-        boolean dbResult = mydb.changeBalance(deposit);
+    public static void initial_DB_Deposit(String deposit) {
+        //boolean dbResult = mydb.changeBalance(deposit);
+        mydb.changeBalance(deposit);
     }
 
 
     //gets the current bank balance from database
-    public static int getCurrentBalance() {
-        int result = mydb.getBalance();
+    public static double getCurrentBalance() {
+        double result = mydb.getBalance();
         return result;
     }
 
     //checks the transaction type and changes the balance on the database
-    public static int bankTransaction(int transaction_amount, String transaction_type) {
-        int result_balance = 0;
-        int curr_balance = getCurrentBalance();
-        int new_balance = 0;
+    public static double bankTransaction(double transaction_amount, String transaction_type) {
+        double result_balance = 0;
+        double curr_balance = getCurrentBalance();
+        double new_balance = 0;
 
         if(transaction_type == "w") {
             new_balance = curr_balance - transaction_amount;
@@ -157,7 +158,8 @@ public class DashboardActivity extends AppCompatActivity {
             if (new_balance < 0 ){
                 return -1;
             } else {
-                boolean dbResult = mydb.changeBalance(new_balance);
+                String str_balance = Double.toString(new_balance);
+                boolean dbResult = mydb.changeBalance(str_balance);
                 if(dbResult){
                     result_balance = new_balance;
                 }
@@ -166,7 +168,9 @@ public class DashboardActivity extends AppCompatActivity {
 
         } else if (transaction_type == "d") {
             new_balance = curr_balance + transaction_amount;
-            boolean dbResult = mydb.changeBalance(new_balance);
+            String str_balance = Double.toString(new_balance);
+            boolean dbResult = mydb.changeBalance(str_balance);
+
             if(dbResult){
                 result_balance = new_balance;
             }

@@ -20,14 +20,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText emailField, passwordField, initialAmount;
+    private EditText usernameField, passwordField, initialAmount;
     private Button SignUpButton;
     private Button signInButton;
     private FirebaseAuth mAuth;
@@ -47,35 +46,25 @@ public class SignUpActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_sign_up);
 
-        emailField = findViewById(R.id.emailSignUp);
+        usernameField = findViewById(R.id.usernameSignUp);
         passwordField = findViewById(R.id.passwordSignUp);
         initialAmount = findViewById(R.id.initialAmount);
         SignUpButton = findViewById(R.id.registerBtn);
         signInButton = findViewById(R.id.signInBtn);
 
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance("https://bankapp-d5b61-default-rtdb.firebaseio.com/").getReference();
 
+        SignUpButton.setOnClickListener(v -> Register());
 
-        SignUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Register();
-            }
-        });
-
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                finish();
-            }
+        signInButton.setOnClickListener(v -> {
+            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+            finish();
         });
     }
 
     private void Register() {
-        // todo: change email and emailField to username
-        String email = emailField.getText().toString();
+        String preUserName = usernameField.getText().toString();
+        String postUserName = preUserName + "@unsecure-bank.com";
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
@@ -85,21 +74,19 @@ public class SignUpActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "It was successful");
-                        // save to database
-                        writeNewUser(task.getResult().getUser());
+
                         Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
                         Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
                         intent.putExtra("USER_BALANCE", initial_balance);
                         startActivity(intent);
                         finish();
                     } else {
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        Log.w(TAG, "createUserWithUserName:failure", task.getException());
                         Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
                     }
 
                 }
             });
- //               progressDialog.dismiss();
         }
     }
 
@@ -118,15 +105,6 @@ public class SignUpActivity extends AppCompatActivity {
             return true;
         }
         return false;
-    }
-
-    private void writeNewUser(FirebaseUser user) {
-        User dbUser = new User(user.getEmail());
-        mDatabase.child("users").child(user.getUid()).setValue(dbUser);
-    }
-
-    private Boolean isValidEmail(CharSequence target) {
-        return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 }
 
