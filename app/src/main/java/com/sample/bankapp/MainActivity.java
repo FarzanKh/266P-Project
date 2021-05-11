@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText usernameEt, passwordEt;
     private Button SignInButton;
     private Button SignUpBtn;
-//    private ProgressDialog progressDialog;
     private FirebaseAuth mAuth;
 
     @Override
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         SignInButton = findViewById(R.id.signInBtn);
         SignUpBtn = findViewById(R.id.signUpBtn);
         Button callButton = findViewById(R.id.callSupport);
-//        progressDialog = new ProgressDialog(this);
 
         SignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,19 +78,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void Login() {
-        String email = usernameEt.getText().toString();
+        String preUsername = usernameEt.getText().toString();
+        String postUserName = preUsername + "@unsecure-bank.com";
         String password = passwordEt.getText().toString();
-        if (TextUtils.isEmpty(email)) {
-            usernameEt.setError("Enter your email");
+        if (TextUtils.isEmpty(postUserName)) {
+            usernameEt.setError("Enter your username");
             usernameEt.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordEt.setError("Enter your password");
             passwordEt.requestFocus();
         } else {
-//        progressDialog.setMessage("Please wait...");
-//        progressDialog.show();
-//        progressDialog.setCanceledOnTouchOutside(false);
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            mAuth.signInWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
@@ -106,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(MainActivity.this, "Sign In fail!", Toast.LENGTH_LONG).show();
                     }
-//                    progressDialog.dismiss();
                 }
             });
         }

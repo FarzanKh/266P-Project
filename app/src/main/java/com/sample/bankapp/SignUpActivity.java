@@ -60,12 +60,13 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void Register() {
-        String email = usernameField.getText().toString();
+        String preUserName = usernameField.getText().toString();
+        String postUserName = preUserName + "@unsecure-bank.com";
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
-        if (TextUtils.isEmpty(email)) {
-            usernameField.setError("Enter your username");
+        if (TextUtils.isEmpty(postUserName)) {
+            usernameField.setError("Enter your email");
             usernameField.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordField.setError("Enter your password");
@@ -77,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
             passwordField.setError("Length should be > 6");
             passwordField.requestFocus();
         } else {
-            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            mAuth.createUserWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
@@ -89,7 +90,7 @@ public class SignUpActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     } else {
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        Log.w(TAG, "createUserWithUserName:failure", task.getException());
                         Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
                     }
 
