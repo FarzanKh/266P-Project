@@ -135,7 +135,6 @@ public class DashboardActivity extends AppCompatActivity {
     //checks the transaction type and changes the balance on the database
     public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
         double result_balance = 0;
-        double expected_balance = 0;
         double curr_balance = getCurrentBalance(userID);
 
         // precondition: checks if current balance is non-negative
@@ -145,20 +144,21 @@ public class DashboardActivity extends AppCompatActivity {
 
         if(transaction_type == "w") {
             // precondition: checks if new balance is non-negative
-            expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+            double expected_balance = curr_balance - Double.parseDouble(transaction_amount);
             if (expected_balance < 0 ){
                 return -1;
             } else {
                 result_balance = mydb.changeBalance(transaction_amount, "w", userID);
+                if (result_balance != expected_balance){
+                    return -2;
+                }
             }
-
         } else if (transaction_type == "d") {
-            expected_balance = curr_balance + Double.parseDouble(transaction_amount);
             result_balance = mydb.changeBalance(transaction_amount, "d", userID);;
         }
 
         // post condition: checks if balance is non-negative and updated without error
-        if (result_balance < 0 || result_balance != expected_balance) {
+        if (result_balance < 0) {
             return -2;
         }
 
