@@ -30,7 +30,6 @@ public class SignUpActivity extends AppCompatActivity {
     private Button SignUpButton;
     private Button signInButton;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
     private static final String TAG = "SignUp - Activity";
 
     @Override
@@ -92,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity {
         } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",password)) {
             passwordField.setError("Invalid password");
             passwordField.requestFocus();
-        } else if (initial_balance.length() < 3 || !Pattern.matches("[0-9.]+",initial_balance) || !Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance)
+        } else if (initial_balance.length() < 4 || initial_balance.length() > 13 || !Pattern.matches("[0-9.]+",initial_balance) || !Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance)
                 || Double.parseDouble(initial_balance) > DatabaseHelper.MAX_INPUT) {
             initialAmount.setError("Invalid initial balance");
             initialAmount.requestFocus();
