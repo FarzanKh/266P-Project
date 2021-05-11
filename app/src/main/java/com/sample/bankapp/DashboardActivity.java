@@ -57,10 +57,9 @@ public class DashboardActivity extends AppCompatActivity {
 
         double starting_balance = getCurrentBalance(user_id);
 
-        ui_balance.setText("$" + starting_balance);
+        ui_balance.setText("$" +  String.format("%.2f",starting_balance));
 
         //*******************************************************************************
-
 
         logoutBtn.setOnClickListener(view -> {
             mAuth.signOut();
@@ -136,7 +135,6 @@ public class DashboardActivity extends AppCompatActivity {
     //checks the transaction type and changes the balance on the database
     public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
         double result_balance = 0;
-        double zero_balance_check = 0;
         double curr_balance = getCurrentBalance(userID);
 
         // precondition: checks if current balance is non-negative
@@ -147,7 +145,7 @@ public class DashboardActivity extends AppCompatActivity {
         if(transaction_type == "w") {
 
             // precondition: checks if new balance is non-negative
-            zero_balance_check = Double.parseDouble(transaction_amount);
+            double zero_balance_check = Double.parseDouble(transaction_amount);
             if (zero_balance_check < 0 ){
                 return -1;
             } else {
@@ -168,7 +166,6 @@ public class DashboardActivity extends AppCompatActivity {
         if (updated_balance < 0 || updated_balance != result_balance){
             return -2;
         }
-
 
         return result_balance;
     }

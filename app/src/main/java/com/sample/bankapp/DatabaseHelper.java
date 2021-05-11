@@ -87,7 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
+    // manages the db version
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion == 1) {
