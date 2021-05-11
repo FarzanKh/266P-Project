@@ -1,6 +1,6 @@
 # 266P-Project
 
-Bank Android Application
+Android Bank Application
 =============================
 
 This is a sample Android App that allow customers to:
