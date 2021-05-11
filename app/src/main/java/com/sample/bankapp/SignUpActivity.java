@@ -65,7 +65,7 @@ public class SignUpActivity extends AppCompatActivity {
         String initial_balance = initialAmount.getText().toString();
 
         if (TextUtils.isEmpty(email)) {
-            usernameField.setError("Enter your email");
+            usernameField.setError("Enter your username");
             usernameField.requestFocus();
         } else if (TextUtils.isEmpty(password)) {
             passwordField.setError("Enter your password");
