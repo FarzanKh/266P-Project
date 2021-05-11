@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,8 +12,6 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.regex.Pattern;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -57,8 +54,9 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         double starting_balance = getCurrentBalance();
+        // todo: add post condition; move post conditions to DatabaseHelper?
 
-        ui_balance.setText("$" + starting_balance);
+        ui_balance.setText("$" + String.format("%.2f",starting_balance));
 
         //*******************************************************************************
 
@@ -80,106 +78,109 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     /** Called when the user touches the button */
-    public void withdrawAmount(View view) {
-        // Do something in response to button click
-        double transaction_result = 0;
+    public void withdrawAmount(View view) throws TransactionStateException {
+        double transaction_result;
 
-        String new_amount = amount.getText().toString();
+        String amountToWithdraw = amount.getText().toString();
 
-        if(new_amount.equals("")) {
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
+        if(amountToWithdraw.equals("")) {
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input.", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            double d_amount = Double.parseDouble(new_amount);
+            double d_amount = Double.parseDouble(amountToWithdraw);
             transaction_result = bankTransaction(d_amount, "w");
         }
 
-        //checks if balance is 0
+        // checks if value would be negative
         if (transaction_result ==  -1) {
             Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
-        } else {
-            ui_balance.setText("$" + String.valueOf(transaction_result));
+        } else if (transaction_result == -2){
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
+            throw new TransactionStateException("Withdraw error.");
+        }
+        else {
+            ui_balance.setText("$" + String.format("%.2f",transaction_result));
         }
     }
 
 
 
     /** Called when the user touches the button */
-    public void depositAmount(View view) {
-        // Do something in response to button click
-        double transaction_result = 0;
-        String new_amount = amount.getText().toString();
-        // todo: delete later:
-        validateAmount(new_amount);
+    public void depositAmount(View view) throws TransactionStateException {
+        double transaction_result;
+        String amountToDeposit = amount.getText().toString();
 
-        if(new_amount.equals("")) {
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid amount", Toast.LENGTH_SHORT).show();
+        if (amountToDeposit.equals("")) {
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input.", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            double d_amount = Double.parseDouble(new_amount);
+            double d_amount = Double.parseDouble(amountToDeposit);
             transaction_result = bankTransaction(d_amount, "d");
         }
 
-        ui_balance.setText("$" + String.valueOf(transaction_result));
-
+        if (transaction_result == -2){
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
+            throw new TransactionStateException("Deposit error.");
+        }
+        else {
+            ui_balance.setText("$" + String.format("%.2f",transaction_result));
+        }
     }
 
-    public int validateAmount(String amount) {
-        // check if valid number
-        boolean matches = Pattern.matches("0|[1-9][0-9]*",amount); //.[0-9]{2}, check if greater than max
-        Log.i("PATTERN_MATCH","Number: " + String.valueOf(matches));
-        //todo: if (matches)
-        int int_amount = Integer.parseInt(amount);
-        return 0;
-    }
-
-    public static void initial_DB_Deposit(String deposit) {
-        //boolean dbResult = mydb.changeBalance(deposit);
+    public void initial_DB_Deposit(String deposit) {
         mydb.changeBalance(deposit);
     }
 
-
     //gets the current bank balance from database
-    public static double getCurrentBalance() {
-        double result = mydb.getBalance();
-        return result;
+    public double getCurrentBalance() {
+        return mydb.getBalance();
     }
 
     //checks the transaction type and changes the balance on the database
-    public static double bankTransaction(double transaction_amount, String transaction_type) {
-        double result_balance = 0;
+    public double bankTransaction(double transaction_amount, String transaction_type) {
         double curr_balance = getCurrentBalance();
         double new_balance = 0;
 
+        // precondition: checks if current balance is non-negative
+        if (curr_balance < 0) {
+            return -2;
+        }
+
+        boolean dbResult = false;
         if(transaction_type == "w") {
             new_balance = curr_balance - transaction_amount;
 
-            //checks if new balance is more than $0
-            if (new_balance < 0 ){
+            // precondition: checks if new balance is non-negative
+            if (new_balance < 0){
                 return -1;
             } else {
                 String str_balance = Double.toString(new_balance);
-                boolean dbResult = mydb.changeBalance(str_balance);
-                if(dbResult){
-                    result_balance = new_balance;
-                }
+                dbResult = mydb.changeBalance(str_balance);
 
             }
 
         } else if (transaction_type == "d") {
             new_balance = curr_balance + transaction_amount;
             String str_balance = Double.toString(new_balance);
-            boolean dbResult = mydb.changeBalance(str_balance);
-
-            if(dbResult){
-                result_balance = new_balance;
-            }
+            dbResult = mydb.changeBalance(str_balance);
         }
 
-        return result_balance;
+        // post condition: checks if db call was successful
+        if(!dbResult) {
+            return -2;
+        }
+        // post condition: checks if updated balance is non-negative and as expected
+        double updated_balance = getCurrentBalance();
+        if (updated_balance < 0 || updated_balance != new_balance){
+            return -2;
+        }
+
+        return new_balance;
     }
 
-
-
-
+    class TransactionStateException extends Exception {
+        public TransactionStateException(String message){
+            super(message);
+        }
+    }
 }

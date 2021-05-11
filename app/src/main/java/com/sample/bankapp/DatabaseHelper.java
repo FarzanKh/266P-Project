@@ -3,6 +3,7 @@ package com.sample.bankapp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -18,6 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //The key to access the balance (value) and user_id
     public static final String COL_ITEM1 = "balance";
     public static final String COL_ITEM2 = "user_id";
+    public static final double MAX_INPUT = 4294967295.99;
 
 
     DatabaseHelper(Context context) {
@@ -55,7 +57,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.execSQL("INSERT INTO "+ DB_TABLE +"("+"balance"+")"+" VALUES "+"  ("+ converted_balance +")");
+        try {
+            db.execSQL("INSERT INTO "+ DB_TABLE +"("+"balance"+")"+" VALUES "+"  ("+ converted_balance +")");
+        }
+        catch (SQLException e){
+            return false;
+        }
 
         //db.execSQL( "insert into Bank_Table (COL_ITEM1) values (converted_balance)" );
 
