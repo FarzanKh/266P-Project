@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,7 +14,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -109,6 +110,8 @@ public class DashboardActivity extends AppCompatActivity {
         // Do something in response to button click
         int transaction_result = 0;
         String new_amount = amount.getText().toString();
+        // todo: delete later:
+        validateAmount(new_amount);
 
         if(new_amount.equals("")) {
             Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid amount", Toast.LENGTH_SHORT).show();
@@ -118,11 +121,17 @@ public class DashboardActivity extends AppCompatActivity {
             transaction_result = bankTransaction(int_amount, "d");
         }
 
-        int int_amount = Integer.parseInt(new_amount);
         ui_balance.setText("$" + String.valueOf(transaction_result));
-
     }
 
+    public int validateAmount(String amount) {
+        // check if valid number
+        boolean matches = Pattern.matches("0|[1-9][0-9]*",amount); //.[0-9]{2}, check if greater than max
+        Log.i("PATTERN_MATCH","Number: " + String.valueOf(matches));
+        //todo: if (matches)
+        int int_amount = Integer.parseInt(amount);
+        return 0;
+    }
 
     public static void initial_DB_Deposit(int deposit) {
         boolean dbResult = mydb.changeBalance(deposit);
