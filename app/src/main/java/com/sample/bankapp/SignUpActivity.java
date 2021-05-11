@@ -32,8 +32,6 @@ public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private static final String TAG = "SignUp - Activity";
-    private static final double MAX_INPUT = 4294967295.99;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,41 +62,38 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void Register() {
         String preUserName = usernameField.getText().toString();
-        String postUserName = preUserName + "@unsecure-bank.com";
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
-        if (validateInputs(email, password, initial_balance)) {
-            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "It was successful");
+        if (signUpValidation(preUserName, password, initial_balance)) {
+            String postUserName = preUserName + "@unsecure-bank.com";
+            mAuth.createUserWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "It was successful");
 
-                        Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
-                        Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
-                        intent.putExtra("USER_BALANCE", initial_balance);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.w(TAG, "createUserWithUserName:failure", task.getException());
-                        Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
-                    }
-
+                    Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
+                    Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
+                    intent.putExtra("USER_BALANCE", initial_balance);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Log.w(TAG, "createUserWithUserName:failure", task.getException());
+                    Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
                 }
+
             });
         }
     }
 
-    private boolean validateInputs(String email, String password, String initial_balance) {
-        // todo: change email and emailField to username
-        if (!Pattern.matches("[_\\-\\.0-9a-z]{1,127}",email)) {
-            emailField.setError("Invalid username");
-            emailField.requestFocus();
-        } else if (!Pattern.matches("[_\\-\\.0-9a-z]{0,127}",password)) {
+    private boolean signUpValidation(String username, String password, String initial_balance) {
+        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",username)) {
+            usernameField.setError("Invalid username");
+            usernameField.requestFocus();
+        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",password)) {
             passwordField.setError("Invalid password");
             passwordField.requestFocus();
-        } else if (!Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance) || Double.parseDouble(initial_balance) > MAX_INPUT) {
+        } else if (initial_balance.length() < 3 || !Pattern.matches("[0-9.]+",initial_balance) || !Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance)
+                || Double.parseDouble(initial_balance) > DatabaseHelper.MAX_INPUT) {
             initialAmount.setError("Invalid initial balance");
             initialAmount.requestFocus();
         } else {
