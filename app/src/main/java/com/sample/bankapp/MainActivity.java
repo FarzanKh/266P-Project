@@ -23,6 +23,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.regex.Pattern;
+
 public class MainActivity extends AppCompatActivity {
     private EditText usernameEt, passwordEt;
     private Button SignInButton;
@@ -48,62 +50,55 @@ public class MainActivity extends AppCompatActivity {
         SignUpBtn = findViewById(R.id.signUpBtn);
         Button callButton = findViewById(R.id.callSupport);
 
-        SignInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Login();
-            }
+        SignInButton.setOnClickListener(v -> Login());
+
+        SignUpBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, SignUpActivity.class));
+            finish();
         });
 
-        SignUpBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SignUpActivity.class));
-                finish();
-            }
-        });
-
-        callButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra("Phonenumber", "8582038129");
-                intent.setAction("CallService");
-                intent.addCategory("android.intent.category.DEFAULT");
-                startActivity(intent);
-                finish();
-            }
+        callButton.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.putExtra("Phonenumber", "8582038129");
+            intent.setAction("CallService");
+            intent.addCategory("android.intent.category.DEFAULT");
+            startActivity(intent);
+            finish();
         });
     }
 
 
     private void Login() {
-        String preUsername = usernameEt.getText().toString();
-        String postUserName = preUsername + "@unsecure-bank.com";
+        String preUserName = usernameEt.getText().toString();
         String password = passwordEt.getText().toString();
-        if (TextUtils.isEmpty(postUserName)) {
-            usernameEt.setError("Enter your username");
-            usernameEt.requestFocus();
-        } else if (TextUtils.isEmpty(password)) {
-            passwordEt.setError("Enter your password");
-            passwordEt.requestFocus();
-        } else {
-            mAuth.signInWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(MainActivity.this, "Login Successfully", Toast.LENGTH_LONG).show();
-                        // startActivity(new Intent(MainActivity.this, DashboardActivity.class));
-                        Intent intent = new Intent();
-                        intent.setAction("DashBoard");
-                        intent.addCategory("android.intent.category.DEFAULT");
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Sign In fail!", Toast.LENGTH_LONG).show();
-                    }
+
+        if (signInValidation(preUserName, password)) {
+            String postUserName = preUserName + "@unsecure-bank.com";
+            mAuth.signInWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Successfully logged in", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent();
+                    intent.setAction("DashBoard");
+                    intent.addCategory("android.intent.category.DEFAULT");
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(MainActivity.this, "Sign in fail!", Toast.LENGTH_LONG).show();
                 }
             });
         }
+    }
+
+    private boolean signInValidation(String username, String password) {
+        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",username)) {
+            usernameEt.setError("Invalid username");
+            usernameEt.requestFocus();
+        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",password)) {
+            passwordEt.setError("Invalid password");
+            passwordEt.requestFocus();
+        } else {
+            return true;
+        }
+        return false;
     }
 }

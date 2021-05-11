@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-
 public class DashboardActivity extends AppCompatActivity {
 
     Button logoutBtn;
@@ -38,7 +37,7 @@ public class DashboardActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mydb = new DatabaseHelper(this);
 
-        //*******************************************************************************
+        //******************************************************************************
 
         //Get user UID from firebase
         String currentuserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -47,16 +46,19 @@ public class DashboardActivity extends AppCompatActivity {
         //Get User balance from sign up page
         String user_balance = getIntent().getStringExtra("USER_BALANCE");
 
+        double starting_balance = 0;
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
-
             //Add user id and initial balance
-            mydb.setupAccountInfo(currentuserID, user_balance);
-
+            starting_balance = mydb.setupAccountInfo(currentuserID, user_balance);
+            if (starting_balance < 0 || starting_balance != Double.parseDouble(user_balance)){
+                ui_balance.setText("Error");
+                return;
+            }
         }
-
-        double starting_balance = getCurrentBalance(user_id);
-
+        else{
+            starting_balance = getCurrentBalance(user_id);
+        }
         ui_balance.setText("$" +  String.format("%.2f",starting_balance));
 
         //*******************************************************************************
@@ -64,7 +66,6 @@ public class DashboardActivity extends AppCompatActivity {
         logoutBtn.setOnClickListener(view -> {
             mAuth.signOut();
             startActivity(new Intent(DashboardActivity.this, MainActivity.class));
-//            finish();
         });
     }
 
@@ -131,10 +132,10 @@ public class DashboardActivity extends AppCompatActivity {
         return mydb.getBalance(userID);
     }
 
-
     //checks the transaction type and changes the balance on the database
     public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
         double result_balance = 0;
+        double expected_balance = 0;
         double curr_balance = getCurrentBalance(userID);
 
         // precondition: checks if current balance is non-negative
@@ -143,33 +144,26 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         if(transaction_type == "w") {
-
             // precondition: checks if new balance is non-negative
-            double zero_balance_check = Double.parseDouble(transaction_amount);
-            if (zero_balance_check < 0 ){
+            expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+            if (expected_balance < 0 ){
                 return -1;
             } else {
-                double changed_balance = mydb.changeBalance(transaction_amount, "w", userID);
-                result_balance = changed_balance;
-
+                result_balance = mydb.changeBalance(transaction_amount, "w", userID);
             }
 
         } else if (transaction_type == "d") {
-            double changed_balance = mydb.changeBalance(transaction_amount, "d", userID);
-            result_balance = changed_balance;
-
+            expected_balance = curr_balance + Double.parseDouble(transaction_amount);
+            result_balance = mydb.changeBalance(transaction_amount, "d", userID);;
         }
 
-
-        // post condition: checks if updated balance is non-negative and as expected
-        double updated_balance = getCurrentBalance(userID);
-        if (updated_balance < 0 || updated_balance != result_balance){
+        // post condition: checks if balance is non-negative and updated without error
+        if (result_balance < 0 || result_balance != expected_balance) {
             return -2;
         }
 
         return result_balance;
     }
-
 
 
     class TransactionStateException extends Exception {

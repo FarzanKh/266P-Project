@@ -23,14 +23,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.regex.Pattern;
+
 public class SignUpActivity extends AppCompatActivity {
     private EditText usernameField, passwordField, initialAmount;
     private Button SignUpButton;
     private Button signInButton;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
     private static final String TAG = "SignUp - Activity";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,42 +61,44 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void Register() {
         String preUserName = usernameField.getText().toString();
-        String postUserName = preUserName + "@unsecure-bank.com";
         String password = passwordField.getText().toString();
         String initial_balance = initialAmount.getText().toString();
 
-        if (TextUtils.isEmpty(postUserName)) {
-            usernameField.setError("Enter your email");
-            usernameField.requestFocus();
-        } else if (TextUtils.isEmpty(password)) {
-            passwordField.setError("Enter your password");
-            passwordField.requestFocus();
-        } else if (TextUtils.isEmpty(initial_balance)) {
-            initialAmount.setError("Enter your initial balance");
-            initialAmount.requestFocus();
-        } else if (password.length() < 6) {
-            passwordField.setError("Length should be > 6");
-            passwordField.requestFocus();
-        } else {
-            mAuth.createUserWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "It was successful");
+        if (signUpValidation(preUserName, password, initial_balance)) {
+            String postUserName = preUserName + "@unsecure-bank.com";
+            mAuth.createUserWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "It was successful");
 
-                        Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
-                        Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
-                        intent.putExtra("USER_BALANCE", initial_balance);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.w(TAG, "createUserWithUserName:failure", task.getException());
-                        Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
-                    }
-
+                    Toast.makeText(SignUpActivity.this,"Successfully registered",Toast.LENGTH_LONG).show();
+                    Intent intent=new Intent(SignUpActivity.this,DashboardActivity.class);
+                    intent.putExtra("USER_BALANCE", initial_balance);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Log.w(TAG, "createUserWithUserName:failure", task.getException());
+                    Toast.makeText(SignUpActivity.this,"Sign up fail!",Toast.LENGTH_LONG).show();
                 }
+
             });
         }
+    }
+
+    private boolean signUpValidation(String username, String password, String initial_balance) {
+        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",username)) {
+            usernameField.setError("Invalid username");
+            usernameField.requestFocus();
+        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",password)) {
+            passwordField.setError("Invalid password");
+            passwordField.requestFocus();
+        } else if (initial_balance.length() < 4 || initial_balance.length() > 13 || !Pattern.matches("[0-9.]+",initial_balance) || !Pattern.matches("0|[1-9][0-9]*.[0-9]{2}",initial_balance)
+                || Double.parseDouble(initial_balance) > DatabaseHelper.MAX_INPUT) {
+            initialAmount.setError("Invalid initial balance");
+            initialAmount.requestFocus();
+        } else {
+            return true;
+        }
+        return false;
     }
 }
 

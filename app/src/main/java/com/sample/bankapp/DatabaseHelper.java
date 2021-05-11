@@ -74,16 +74,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Adds the initial user ID and deposit to the database (Only occurs when a user signs up)
-    public boolean setupAccountInfo(String userId, String initial_deposit){
+    public double setupAccountInfo(String userId, String initial_deposit){
         SQLiteDatabase db = this.getWritableDatabase();
 
         try {
             db.execSQL("INSERT INTO "+ DB_TABLE +"(" + "user_id" + "," + "balance" + ")"+" VALUES "+" ("+ "'" + userId + "'" + "," + "'" + initial_deposit + "'" + ")");
         }  catch (SQLException e){
-            return false;
+            return -1;
         }
-
-        return true;
+        return getBalance(userId);
     }
 
 
