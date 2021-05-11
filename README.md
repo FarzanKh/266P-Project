@@ -35,3 +35,11 @@ Connect an Android device to your development machine.
 
 * Select `Run -> Run 'app'` from the menu bar
 * Select the device you wish to run the app on and click 'OK'
+
+## Attributions
+
+https://mkyong.com/java/java-display-double-in-2-decimal-points/ 
+https://stackoverflow.com/questions/37467492/how-to-provide-user-login-with-a-username-and-not-an-email 
+https://stackoverflow.com/questions/14258540/how-to-write-a-sqlite-execsql-function-in-android
+https://www.sqlitetutorial.net/sqlite-insert/
+https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
