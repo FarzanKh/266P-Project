@@ -25,14 +25,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(user_id varchar, balance int);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS Bank_Table(user_id varchar, balance real);");
     }
 
     //Method gets the balance from the database
-    public int getBalance() {
+    public double getBalance() {
 
-        int result_balance = 0;
-        int item = 0;
+        double result_balance = 0;
+        double item = 0;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -44,26 +44,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             item = res.getInt(res.getColumnIndex(COL_ITEM1));
             res.moveToNext();
         }
-        System.out.println(" get BALANCE "+ item);
 
         result_balance = item;
         return result_balance;
     }
 
     //changes the balance in the database
-    public boolean changeBalance (int new_balance) {
-        System.out.println("What is the new balance"+ new_balance);
-
+    public boolean changeBalance (String new_balance) {
+        double converted_balance = Double.parseDouble(new_balance);
 
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_ITEM1, new_balance);
 
-        db.insert(DB_TABLE, null, contentValues);
+        db.execSQL("INSERT INTO "+ DB_TABLE +"("+"balance"+")"+" VALUES "+"  ("+ converted_balance +")");
+
+        //db.execSQL( "insert into Bank_Table (COL_ITEM1) values (converted_balance)" );
+
+          //This is correct and secure code *commented out for now*
+//                SQLiteDatabase db = this.getWritableDatabase();
+//                ContentValues contentValues = new ContentValues();
+//                contentValues.put(COL_ITEM1, converted_balance);
+//                db.insert(DB_TABLE, null, contentValues);
+
         return true;
     }
 
-
+    // Sets the user ID retrieved from Firebase
     public boolean setUserId(String userId){
 
         SQLiteDatabase db = this.getWritableDatabase();
