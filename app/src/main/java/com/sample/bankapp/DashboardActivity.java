@@ -21,7 +21,6 @@ public class DashboardActivity extends AppCompatActivity {
     EditText amount;
     TextView ui_balance;
 
-
     private static String user_id;
 
     private static DatabaseHelper mydb ;
