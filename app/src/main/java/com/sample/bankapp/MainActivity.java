@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CALL_PHONE},1);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CALL_PHONE}, 1);
         }
         // remove bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -57,14 +58,26 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
+
         callButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            intent.putExtra("Phonenumber", "8582038129");
-            intent.setAction("CallService");
-            intent.addCategory("android.intent.category.DEFAULT");
-            startActivity(intent);
-            finish();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+
+                Intent intent = new Intent();
+                intent.putExtra("Phonenumber", "8582038129");
+                intent.setAction("CallService");
+                intent.addCategory("android.intent.category.DEFAULT");
+                startActivity(intent);
+                finish();
+
+            } else {
+                showToast();
+            }
         });
+    }
+
+    private void showToast() {
+        Toast toast = Toast.makeText(this, "You must give the phone call permission", Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 
@@ -90,10 +103,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean signInValidation(String username, String password) {
-        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",username)) {
+        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*", username)) {
             usernameEt.setError("Invalid username");
             usernameEt.requestFocus();
-        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*",password)) {
+        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*", password)) {
             passwordEt.setError("Invalid password");
             passwordEt.requestFocus();
         } else {
