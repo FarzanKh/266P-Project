@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME = "BankDBSK"; // the name of our database
+    private static final String DB_NAME = "BankApp"; // the name of our database
     private static final int DB_VERSION = 1;
     private static final String DB_TABLE = "Banking_Table";
     private static final int DB_VERSION2 = 2;
@@ -53,21 +53,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //changes the balance in the database
     public double changeBalance (String transaction_amount, String transaction_type, String userID) {
         SQLiteDatabase db = this.getWritableDatabase();
+        double wBalance;
 
-        if(transaction_type == "w") { //Add to curr balance
-            try{
-                db.execSQL("UPDATE "+ DB_TABLE +" SET balance = balance - " + transaction_amount + " "+" WHERE  user_id = " + "'" + userID + "'");
-            } catch (SQLException e){
-                return -2;
+        double currBalance = getBalance(userID);
+        double transaction_double = Double.parseDouble(transaction_amount);
+
+        if(transaction_type == "w") { //Subtract from curr balance
+
+            if(transaction_double > currBalance) {
+                return -1;
+            } else {
+                wBalance = (double) (currBalance - transaction_double);
             }
 
-        } else if(transaction_type == "d") { //Subtract from curr balance
-            try{
-                db.execSQL("UPDATE "+ DB_TABLE +" SET balance = balance + " + transaction_amount + " "+" WHERE  user_id = " + "'" + userID + "'");
-            } catch (SQLException e){
-                return -2;
-            }
+            ContentValues values = new ContentValues();
+            values.put("balance", wBalance);
+
+            db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
+
+        } else if(transaction_type == "d") { //Add to curr balance
+
+            ContentValues values = new ContentValues();
+            values.put("balance", Double.sum(currBalance, transaction_double));
+            db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
+
         }
+
         double changed_balance = getBalance(userID);
 
         return changed_balance;
@@ -77,11 +88,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public double setupAccountInfo(String userId, String initial_deposit){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        try {
-            db.execSQL("INSERT INTO "+ DB_TABLE +"(" + "user_id" + "," + "balance" + ")"+" VALUES "+" ("+ "'" + userId + "'" + "," + "'" + initial_deposit + "'" + ")");
-        }  catch (SQLException e){
-            return -1;
-        }
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put("user_id", userId);
+        values.put("balance", initial_deposit);
+
+        db.insert(DB_TABLE, null, values);
+
+
         return getBalance(userId);
     }
 
