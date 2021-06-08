@@ -13,6 +13,9 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Objects;
+import java.util.regex.Pattern;
+
 public class DashboardActivity extends AppCompatActivity {
 
     Button logoutBtn;
@@ -21,8 +24,9 @@ public class DashboardActivity extends AppCompatActivity {
     TextView ui_balance;
 
     private static String user_id;
+    private static DatabaseHelper mydb;
 
-    private static DatabaseHelper mydb ;
+    private final double MAX_BALANCE = 10000000000.00;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,26 +44,31 @@ public class DashboardActivity extends AppCompatActivity {
         //******************************************************************************
 
         //Get user UID from firebase
-        String currentuserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        user_id = currentuserID;
+        user_id = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
 
         //Get User balance from sign up page
         String user_balance = getIntent().getStringExtra("USER_BALANCE");
 
-        double starting_balance = 0;
+        double starting_balance;
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
-            //Add user id and initial balance
-            starting_balance = mydb.setupAccountInfo(currentuserID, user_balance);
-            if (starting_balance < 0 || starting_balance != Double.parseDouble(user_balance)){
+            // Add user id and initial balance
+            starting_balance = mydb.setupAccountInfo(user_id, user_balance);
+            // post-condition
+            if (starting_balance < 0 || starting_balance > MAX_BALANCE || starting_balance != Double.parseDouble(user_balance)){
                 ui_balance.setText("Error");
-                return;
+                Toast.makeText(getApplicationContext(),"Account creation error. Please contact support.", Toast.LENGTH_SHORT).show();
             }
         }
         else{
             starting_balance = getCurrentBalance(user_id);
+            // todo: what if there's no current balance? do we set to zero automatically?
+            //  make sure to check DatabaseHelper new code to see if it throws an error if user not found
+            //  then create a user in that case
+            //  also check .equals vs == in dbhelper
+            //  also change so dbhelper throws exceptions
         }
-        ui_balance.setText("$" +  String.format("%.2f",starting_balance));
+        ui_balance.setText(String.format("$%s", String.format("%.2f", starting_balance)));
 
         //*******************************************************************************
 
@@ -79,25 +88,27 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     /** Called when the user touches the button */
-    public void withdrawAmount(View view) throws TransactionStateException  {
-        double transaction_result ;
-        String amountToWithdraw  = amount.getText().toString();
+    public void withdrawAmount(View view) {
+        double transaction_result;
+        String amountToWithdraw = amount.getText().toString();
 
-        if(amountToWithdraw .equals("")) {
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input!", Toast.LENGTH_SHORT).show();
-            return;
+        // todo: check if set errors work and delete comments
+        if(!FormatChecker.isValidNumberFormat(amountToWithdraw)) {
+            amount.setError("Invalid amount");
+            amount.requestFocus();
+//            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input!", Toast.LENGTH_SHORT).show();
         } else {
-            transaction_result = bankTransaction(amountToWithdraw, "w", user_id);
-        }
-
-        //checks if value would be negative
-        if (transaction_result ==  -1) {
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
-        } else if (transaction_result == -2){
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
-            throw new TransactionStateException("Withdraw error.");
-        } else {
-            ui_balance.setText("$" + String.format("%.2f",transaction_result));
+            try {
+                transaction_result = bankTransaction(amountToWithdraw, "w", user_id);
+                ui_balance.setText(String.format("$%s", String.format("%.2f", transaction_result)));
+            }
+            catch (InsufficientFundsException e) {
+                Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
+            } catch (BalanceLimitExceededException e) {
+                Toast.makeText(getApplicationContext(), "Transaction Failed: Would exceed maximum balance!", Toast.LENGTH_SHORT).show();
+            } catch (TransactionStateException e) {
+                // todo: have column in sql table to set inactive? and tell user to contact support to resolve the issue?
+            }
         }
     }
 
@@ -108,69 +119,84 @@ public class DashboardActivity extends AppCompatActivity {
         double transaction_result;
         String amountToDeposit = amount.getText().toString();
 
-        if(amountToDeposit.equals("")) {
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input", Toast.LENGTH_SHORT).show();
-            return;
+        if (!FormatChecker.isValidNumberFormat(amountToDeposit)) {
+            amount.setError("Invalid amount");
+            amount.requestFocus();
+//            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input", Toast.LENGTH_SHORT).show();
         } else {
-            transaction_result = bankTransaction(amountToDeposit, "d", user_id);
+            try {
+                transaction_result = bankTransaction(amountToDeposit, "d", user_id);
+                ui_balance.setText(String.format("$%s", String.format("%.2f", transaction_result)));
+            } catch (InsufficientFundsException e){
+                Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
+            } catch (BalanceLimitExceededException e){
+                Toast.makeText(getApplicationContext(), "Transaction Failed: Would go over max balance!", Toast.LENGTH_SHORT).show();
+            } catch (TransactionStateException e) {
+                // todo: have column in sql table to set inactive? and tell user to contact support to resolve the issue?
+            }
         }
-
-        if (transaction_result == -2){
-            Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
-            throw new TransactionStateException("Deposit error.");
-        }
-        else {
-            ui_balance.setText("$" + String.format("%.2f",transaction_result));
-        }
-
     }
 
-
-
-    //gets the current bank balance from database
-    public double getCurrentBalance(String userID) {
+    /** Gets the current bank balance from database */
+    private double getCurrentBalance(String userID) {
         return mydb.getBalance(userID);
     }
 
-    //checks the transaction type and changes the balance on the database
-    public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
-        double result_balance = 0;
+    /** Checks the transaction type and changes the balance on the database, returns -1 if would result in
+        invalid balance and -2 if there is an unexpected transaction error */
+    private double bankTransaction(String transaction_amount, String transaction_type, String userID) throws TransactionStateException, InsufficientFundsException, BalanceLimitExceededException {
         double curr_balance = getCurrentBalance(userID);
 
         // precondition: checks if current balance is non-negative
-        if (curr_balance < 0) {
-            return -2;
+        if (curr_balance < 0 || curr_balance > MAX_BALANCE) {
+            throw new TransactionStateException("Current balance outside of allowed range.");
         }
 
-        if(transaction_type == "w") {
-            // precondition: checks if new balance is non-negative
-            double expected_balance = curr_balance - Double.parseDouble(transaction_amount);
-            if (expected_balance < 0 ){
-                return -1;
-            } else {
-                result_balance = mydb.changeBalance(transaction_amount, "w", userID);
-                if (result_balance != expected_balance){
-                    return -2;
-                }
-            }
-        } else if (transaction_type == "d") {
-            result_balance = mydb.changeBalance(transaction_amount, "d", userID);;
+        double expected_balance = 0;
+        double result_balance = 0;
+
+        if (transaction_type.equals("w")) {
+            expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+        } else if (transaction_type.equals("d")) {
+            expected_balance = curr_balance + Double.parseDouble(transaction_amount);
         }
 
-        // post condition: checks if balance is non-negative and updated without error
-        if (result_balance < 0) {
-            return -2;
+        // precondition: checks if new balance would be non-negative
+        if (expected_balance < 0){
+            throw new InsufficientFundsException("Less than $" + transaction_amount + " in balance.");
+        } // precondition: checks if new balance would be more than max
+        else if (expected_balance > MAX_BALANCE){
+            throw new BalanceLimitExceededException("Depositing $" + transaction_amount + " would exceed max balance allowed.");
+        } else {
+            result_balance = mydb.changeBalance(transaction_amount, transaction_type, userID);
+        }
+
+        // post condition: checks if balance is within proper range and updated without error
+        if (result_balance < 0 || result_balance > MAX_BALANCE) {
+            throw new TransactionStateException("Balance after transaction outside of allowed range.");
+        } else if (result_balance != expected_balance){
+            throw new TransactionStateException("Transaction yielded unexpected balance.");
         }
 
         return result_balance;
     }
 
-
+    // todo: also handle SQL exception from db
     class TransactionStateException extends Exception {
         public TransactionStateException(String message){
             super(message);
         }
     }
 
+    class InsufficientFundsException extends Exception {
+        public InsufficientFundsException(String message){
+            super(message);
+        }
+    }
 
+    class BalanceLimitExceededException extends Exception {
+        public BalanceLimitExceededException(String message){
+            super(message);
+        }
+    }
 }

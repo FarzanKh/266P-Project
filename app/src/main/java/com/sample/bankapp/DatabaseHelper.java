@@ -19,7 +19,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //The key to access the balance (value) and user_id
     public static final String COL_ITEM1 = "user_id";
     public static final String COL_ITEM2 = "balance";
-    public static final double MAX_INPUT = 4294967295.99;
 
 
     DatabaseHelper(Context context) {

@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         String password = passwordEt.getText().toString();
 
         if (signInValidation(preUserName, password)) {
-            String postUserName = preUserName + "@unsecure-bank.com";
+            String postUserName = preUserName + "@secure-bank.com";
             mAuth.signInWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainActivity.this, "Successfully logged in", Toast.LENGTH_LONG).show();
@@ -109,10 +109,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean signInValidation(String username, String password) {
-        if (username.length() < 1 || username.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*", username)) {
+        if (!FormatChecker.isValidUsernameFormat(username)) {
             usernameEt.setError("Invalid username");
             usernameEt.requestFocus();
-        } else if (password.length() < 6 || password.length() > 127 || !Pattern.matches("[_\\-\\.0-9a-z]*", password)) {
+        } else if (!FormatChecker.isValidPasswordFormat(password)) {
             passwordEt.setError("Invalid password");
             passwordEt.requestFocus();
         } else {

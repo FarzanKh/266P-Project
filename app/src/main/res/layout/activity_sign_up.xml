@@ -76,7 +76,7 @@
             android:layout_height="65dp"
             android:background="@drawable/rectangular_field_amount"
             android:hint="Enter your initial balance..."
-            android:inputType="text"
+            android:inputType="numberDecimal"
             android:paddingVertical="15dp"
             android:paddingLeft="60dp"
             android:textColor="#000000" />

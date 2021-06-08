@@ -46,7 +46,7 @@
             android:background="@drawable/rectangular_field"
             android:fontFamily="@font/roboto"
             android:hint="Enter the amount..."
-            android:inputType="text"
+            android:inputType="numberDecimal"
             android:paddingVertical="15dp"
             android:paddingLeft="60dp"
             android:textColor="#000000" />
