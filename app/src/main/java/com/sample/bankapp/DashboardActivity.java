@@ -53,9 +53,10 @@ public class DashboardActivity extends AppCompatActivity {
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
             // Add user id and initial balance
-            starting_balance = mydb.setupAccountInfo(user_id, user_balance);
-            // post-condition
-            if (starting_balance < 0 || starting_balance > MAX_BALANCE || starting_balance != Double.parseDouble(user_balance)){
+            double user_balance_double = Double.parseDouble(user_balance);
+            starting_balance = mydb.setupAccountInfo(user_id, user_balance_double);
+            // post condition
+            if (starting_balance < 0 || starting_balance > MAX_BALANCE || starting_balance != user_balance_double){
                 ui_balance.setText("Error");
                 Toast.makeText(getApplicationContext(),"Account creation error. Please contact support.", Toast.LENGTH_SHORT).show();
             }
@@ -146,19 +147,20 @@ public class DashboardActivity extends AppCompatActivity {
         invalid balance and -2 if there is an unexpected transaction error */
     private double bankTransaction(String transaction_amount, String transaction_type, String userID) throws TransactionStateException, InsufficientFundsException, BalanceLimitExceededException {
         double curr_balance = getCurrentBalance(userID);
+        double expected_balance = 0;
+        double transaction_double = Double.parseDouble(transaction_amount);
 
         // precondition: checks if current balance is non-negative
         if (curr_balance < 0 || curr_balance > MAX_BALANCE) {
             throw new TransactionStateException("Current balance outside of allowed range.");
         }
 
-        double expected_balance = 0;
         double result_balance = 0;
 
         if (transaction_type.equals("w")) {
-            expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+            expected_balance = curr_balance - transaction_double;
         } else if (transaction_type.equals("d")) {
-            expected_balance = curr_balance + Double.parseDouble(transaction_amount);
+            expected_balance = curr_balance + transaction_double;
         }
 
         // precondition: checks if new balance would be non-negative
@@ -168,7 +170,7 @@ public class DashboardActivity extends AppCompatActivity {
         else if (expected_balance > MAX_BALANCE){
             throw new BalanceLimitExceededException("Depositing $" + transaction_amount + " would exceed max balance allowed.");
         } else {
-            result_balance = mydb.changeBalance(transaction_amount, transaction_type, userID);
+            result_balance = mydb.changeBalance(transaction_double, transaction_type, userID);
         }
 
         // post condition: checks if balance is within proper range and updated without error
