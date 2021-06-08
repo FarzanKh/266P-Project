@@ -52,27 +52,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //changes the balance in the database
-    public double changeBalance (String transaction_amount, String transaction_type, String userID) {
+    public double changeBalance (double transaction_amount, String transaction_type, String userID) {
         SQLiteDatabase db = this.getWritableDatabase();
         double wBalance;
 
         double currBalance = getBalance(userID);
-        double transaction_double = 0;
 
+        if(transaction_type.equals("w")) { //Subtract from curr balance
 
-        try {  //Checks if user input is an actual double when converted from a string
-            transaction_double = Double.parseDouble(transaction_amount);
-            System.out.println(Double.parseDouble(transaction_amount));
-        } catch(Exception e) {
-            return 50;
-        }
-
-        if(transaction_type == "w") { //Subtract from curr balance
-
-            if(transaction_double > currBalance) {
+            if(transaction_amount > currBalance) {
                 return -1;
             } else {
-                wBalance = (double) (currBalance - transaction_double);
+                wBalance = currBalance - transaction_amount;
             }
 
             ContentValues values = new ContentValues();
@@ -80,21 +71,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
 
-        } else if(transaction_type == "d") { //Add to curr balance
+        } else if(transaction_type.equals("d")) { //Add to curr balance
 
             ContentValues values = new ContentValues();
-            values.put("balance", Double.sum(currBalance, transaction_double));
+            values.put("balance", Double.sum(currBalance, transaction_amount));
             db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
 
         }
 
-        double changed_balance = getBalance(userID);
-
-        return changed_balance;
+        return getBalance(userID);
     }
 
     // Adds the initial user ID and deposit to the database (Only occurs when a user signs up)
-    public double setupAccountInfo(String userId, String initial_deposit){
+    public double setupAccountInfo(String userId, double initial_deposit){
         SQLiteDatabase db = this.getWritableDatabase();
 
         // Create a new map of values, where column names are the keys
