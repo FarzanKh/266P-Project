@@ -50,8 +50,9 @@ public class DashboardActivity extends AppCompatActivity {
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
             //Add user id and initial balance
-            starting_balance = mydb.setupAccountInfo(currentuserID, user_balance);
-            if (starting_balance < 0 || starting_balance != Double.parseDouble(user_balance)){
+            double user_balance_double = Double.parseDouble(user_balance);
+            starting_balance = mydb.setupAccountInfo(currentuserID, user_balance_double);
+            if (starting_balance < 0 || starting_balance != user_balance_double){
                 ui_balance.setText("Error");
                 return;
             }
@@ -118,8 +119,7 @@ public class DashboardActivity extends AppCompatActivity {
         if (transaction_result == -2){
             Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
             throw new TransactionStateException("Deposit error.");
-        }
-        else {
+        } else {
             ui_balance.setText("$" + String.format("%.2f",transaction_result));
         }
 
@@ -136,6 +136,8 @@ public class DashboardActivity extends AppCompatActivity {
     public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
         double result_balance = 0;
         double curr_balance = getCurrentBalance(userID);
+        double expected_balance = 0;
+        double transaction_double = Double.parseDouble(transaction_amount);
 
         // precondition: checks if current balance is non-negative
         if (curr_balance < 0) {
@@ -143,18 +145,24 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         if(transaction_type == "w") {
-            // precondition: checks if new balance is non-negative
-            double expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+
+            try {
+                // precondition: checks if new balance is non-negative
+                expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+            } catch(Exception e) {
+                return 50;
+            }
+
             if (expected_balance < 0 ){
                 return -1;
             } else {
-                result_balance = mydb.changeBalance(transaction_amount, "w", userID);
+                result_balance = mydb.changeBalance(transaction_double, "w", userID);
                 if (result_balance != expected_balance){
                     return -2;
                 }
             }
         } else if (transaction_type == "d") {
-            result_balance = mydb.changeBalance(transaction_amount, "d", userID);;
+            result_balance = mydb.changeBalance(transaction_double, "d", userID);;
         }
 
         // post condition: checks if balance is non-negative and updated without error
