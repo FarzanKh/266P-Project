@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -61,14 +62,16 @@ public class MainActivity extends AppCompatActivity {
 
         callButton.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-
+                /* Bad Code
                 Intent intent = new Intent();
                 intent.putExtra("Phonenumber", "8582038129");
                 intent.setAction("CallService");
                 intent.addCategory("android.intent.category.DEFAULT");
                 startActivity(intent);
-                finish();
-
+                */
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:" + "8582038129"));
+                startActivity(callIntent);
             } else {
                 showToast();
             }
@@ -90,9 +93,12 @@ public class MainActivity extends AppCompatActivity {
             mAuth.signInWithEmailAndPassword(postUserName, password).addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainActivity.this, "Successfully logged in", Toast.LENGTH_LONG).show();
+                    /* Bad Code
                     Intent intent = new Intent();
                     intent.setAction("DashBoard");
                     intent.addCategory("android.intent.category.DEFAULT");
+                    */
+                    Intent intent = new Intent(this, DashboardActivity.class); // Fix using explicit intent
                     startActivity(intent);
                     finish();
                 } else {
