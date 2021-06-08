@@ -14,6 +14,6 @@ public class FormatChecker {
     }
 
     public static boolean isValidNumberFormat(String number){
-        return number.length() >= 4 && number.length() <= 13 && Pattern.matches("[0-9.]+",number) && Pattern.matches("[0|[1-9][0-9]*].[0-9]{2}",number) && Double.parseDouble(number) <= MAX_INPUT;
+        return number.length() >= 4 && number.length() <= 13 && Pattern.matches("[0-9.]+",number) && Pattern.matches("(0|[1-9][0-9]*).[0-9]{2}",number) && Double.parseDouble(number) <= MAX_INPUT;
     }
 }
