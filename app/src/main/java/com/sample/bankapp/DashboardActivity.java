@@ -96,7 +96,9 @@ public class DashboardActivity extends AppCompatActivity {
         } else if (transaction_result == -2){
             Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
             throw new TransactionStateException("Withdraw error.");
-        } else {
+        }  else if (transaction_result == 50) { //If input is invalid
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Incorrect input value", Toast.LENGTH_SHORT).show();
+        }   else {
             ui_balance.setText("$" + String.format("%.2f",transaction_result));
         }
     }
@@ -118,8 +120,9 @@ public class DashboardActivity extends AppCompatActivity {
         if (transaction_result == -2){
             Toast.makeText(getApplicationContext(), "Transaction Failed: Withdraw Error", Toast.LENGTH_SHORT).show();
             throw new TransactionStateException("Deposit error.");
-        }
-        else {
+        } else if (transaction_result == 50) { //If input is invalid
+            Toast.makeText(getApplicationContext(), "Transaction Failed: Incorrect input value", Toast.LENGTH_SHORT).show();
+        } else {
             ui_balance.setText("$" + String.format("%.2f",transaction_result));
         }
 
@@ -136,6 +139,7 @@ public class DashboardActivity extends AppCompatActivity {
     public double bankTransaction(String transaction_amount, String transaction_type, String userID) {
         double result_balance = 0;
         double curr_balance = getCurrentBalance(userID);
+        double expected_balance = 0;
 
         // precondition: checks if current balance is non-negative
         if (curr_balance < 0) {
@@ -143,8 +147,14 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         if(transaction_type == "w") {
-            // precondition: checks if new balance is non-negative
-            double expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+
+            try {
+                // precondition: checks if new balance is non-negative
+                expected_balance = curr_balance - Double.parseDouble(transaction_amount);
+            } catch(Exception e) {
+                return 50;
+            }
+
             if (expected_balance < 0 ){
                 return -1;
             } else {

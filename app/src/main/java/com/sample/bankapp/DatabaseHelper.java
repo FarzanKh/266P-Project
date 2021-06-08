@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.SQLException;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -56,7 +57,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         double wBalance;
 
         double currBalance = getBalance(userID);
-        double transaction_double = Double.parseDouble(transaction_amount);
+        double transaction_double = 0;
+
+
+        try {  //Checks if user input is an actual double when converted from a string
+            transaction_double = Double.parseDouble(transaction_amount);
+            System.out.println(Double.parseDouble(transaction_amount));
+        } catch(Exception e) {
+            return 50;
+        }
 
         if(transaction_type == "w") { //Subtract from curr balance
 
@@ -94,7 +103,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("balance", initial_deposit);
 
         db.insert(DB_TABLE, null, values);
-
 
         return getBalance(userId);
     }
