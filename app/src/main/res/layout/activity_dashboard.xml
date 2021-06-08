@@ -19,7 +19,7 @@
         <TextView
             android:id="@+id/textView2"
             android:layout_width="139dp"
-            android:layout_height="62dp"
+            android:layout_height="100dp"
             android:text="Balance: "
             android:textSize="35dp"
             android:textStyle="bold" />
@@ -27,7 +27,7 @@
         <TextView
             android:id="@+id/balance"
             android:layout_width="189dp"
-            android:layout_height="59dp"
+            android:layout_height="90dp"
             android:text=""
             android:textSize="35dp" />
 
