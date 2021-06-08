@@ -26,7 +26,7 @@ public class DashboardActivity extends AppCompatActivity {
     private static String user_id;
     private static DatabaseHelper mydb;
 
-    private final double MAX_BALANCE = 10000000000.00;
+    public static final double MAX_BALANCE = 10000000000.00;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +49,16 @@ public class DashboardActivity extends AppCompatActivity {
         //Get User balance from sign up page
         String user_balance = getIntent().getStringExtra("USER_BALANCE");
 
-        double starting_balance;
+        double starting_balance = 0;
         //Make sure it's Sign up page that these values are valid
         if(user_balance != null) {
             // Add user id and initial balance
             double user_balance_double = Double.parseDouble(user_balance);
-            starting_balance = mydb.setupAccountInfo(user_id, user_balance_double);
+            try {
+                starting_balance = mydb.setupAccountInfo(user_id, user_balance_double);
+            } catch (DatabaseHelper.UserNotFoundException e) {
+                Toast.makeText(getApplicationContext(),"Could not create account. Please contact support.", Toast.LENGTH_SHORT).show();
+            }
             // post condition
             if (starting_balance < 0 || starting_balance > MAX_BALANCE || starting_balance != user_balance_double){
                 ui_balance.setText("Error");
@@ -62,12 +66,11 @@ public class DashboardActivity extends AppCompatActivity {
             }
         }
         else{
-            starting_balance = getCurrentBalance(user_id);
-            // todo: what if there's no current balance? do we set to zero automatically?
-            //  make sure to check DatabaseHelper new code to see if it throws an error if user not found
-            //  then create a user in that case
-            //  also check .equals vs == in dbhelper
-            //  also change so dbhelper throws exceptions
+            try {
+                starting_balance = getCurrentBalance(user_id);
+            } catch (DatabaseHelper.UserNotFoundException e) {
+                Toast.makeText(getApplicationContext(), "Transaction Failed: User not found. Please contact support.", Toast.LENGTH_SHORT).show();
+            }
         }
         ui_balance.setText(String.format("$%s", String.format("%.2f", starting_balance)));
 
@@ -87,20 +90,27 @@ public class DashboardActivity extends AppCompatActivity {
 
     }
 
-
     /** Called when the user touches the button */
     public void withdrawAmount(View view) {
+        updateAmount("w");
+    }
+
+    /** Called when the user touches the button */
+    public void depositAmount(View view) {
+        updateAmount("d");
+    }
+
+    private void updateAmount(String type) {
         double transaction_result;
         String amountToWithdraw = amount.getText().toString();
 
-        // todo: check if set errors work and delete comments
         if(!FormatChecker.isValidNumberFormat(amountToWithdraw)) {
             amount.setError("Invalid amount");
             amount.requestFocus();
 //            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input!", Toast.LENGTH_SHORT).show();
         } else {
             try {
-                transaction_result = bankTransaction(amountToWithdraw, "w", user_id);
+                transaction_result = bankTransaction(amountToWithdraw, type, user_id);
                 ui_balance.setText(String.format("$%s", String.format("%.2f", transaction_result)));
             }
             catch (InsufficientFundsException e) {
@@ -108,44 +118,21 @@ public class DashboardActivity extends AppCompatActivity {
             } catch (BalanceLimitExceededException e) {
                 Toast.makeText(getApplicationContext(), "Transaction Failed: Would exceed maximum balance!", Toast.LENGTH_SHORT).show();
             } catch (TransactionStateException e) {
-                // todo: have column in sql table to set inactive? and tell user to contact support to resolve the issue?
-            }
-        }
-    }
-
-
-
-    /** Called when the user touches the button */
-    public void depositAmount(View view) throws TransactionStateException {
-        double transaction_result;
-        String amountToDeposit = amount.getText().toString();
-
-        if (!FormatChecker.isValidNumberFormat(amountToDeposit)) {
-            amount.setError("Invalid amount");
-            amount.requestFocus();
-//            Toast.makeText(getApplicationContext(), "Transaction Failed: Please enter a valid input", Toast.LENGTH_SHORT).show();
-        } else {
-            try {
-                transaction_result = bankTransaction(amountToDeposit, "d", user_id);
-                ui_balance.setText(String.format("$%s", String.format("%.2f", transaction_result)));
-            } catch (InsufficientFundsException e){
-                Toast.makeText(getApplicationContext(), "Transaction Failed: Not enough money to withdraw!", Toast.LENGTH_SHORT).show();
-            } catch (BalanceLimitExceededException e){
-                Toast.makeText(getApplicationContext(), "Transaction Failed: Would go over max balance!", Toast.LENGTH_SHORT).show();
-            } catch (TransactionStateException e) {
-                // todo: have column in sql table to set inactive? and tell user to contact support to resolve the issue?
+                Toast.makeText(getApplicationContext(), "Transaction Failed: Balance error. Please contact support.", Toast.LENGTH_SHORT).show();
+            } catch (DatabaseHelper.UserNotFoundException e){
+                Toast.makeText(getApplicationContext(), "Transaction Failed: User not found. Please contact support.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     /** Gets the current bank balance from database */
-    private double getCurrentBalance(String userID) {
+    private double getCurrentBalance(String userID) throws DatabaseHelper.UserNotFoundException {
         return mydb.getBalance(userID);
     }
 
     /** Checks the transaction type and changes the balance on the database, returns -1 if would result in
         invalid balance and -2 if there is an unexpected transaction error */
-    private double bankTransaction(String transaction_amount, String transaction_type, String userID) throws TransactionStateException, InsufficientFundsException, BalanceLimitExceededException {
+    private double bankTransaction(String transaction_amount, String transaction_type, String userID) throws TransactionStateException, InsufficientFundsException, BalanceLimitExceededException, DatabaseHelper.UserNotFoundException {
         double curr_balance = getCurrentBalance(userID);
         double expected_balance = 0;
         double transaction_double = Double.parseDouble(transaction_amount);
@@ -183,20 +170,19 @@ public class DashboardActivity extends AppCompatActivity {
         return result_balance;
     }
 
-    // todo: also handle SQL exception from db
     class TransactionStateException extends Exception {
         public TransactionStateException(String message){
             super(message);
         }
     }
 
-    class InsufficientFundsException extends Exception {
+    static class InsufficientFundsException extends Exception {
         public InsufficientFundsException(String message){
             super(message);
         }
     }
 
-    class BalanceLimitExceededException extends Exception {
+    static class BalanceLimitExceededException extends Exception {
         public BalanceLimitExceededException(String message){
             super(message);
         }

@@ -5,10 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.SQLException;
-import android.widget.Toast;
-
-import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -31,38 +27,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //Method gets the balance from the database
-    public double getBalance(String user_id) {
+    public double getBalance(String user_id) throws UserNotFoundException {
 
-        double result_balance = 0;
-        double item = 0;
+        double result_balance = Double.MIN_VALUE;
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor res =  db.rawQuery( "SELECT balance FROM Banking_Table WHERE user_id = ?", new String[] {user_id} );
         res.moveToFirst();
 
-        while(res.isAfterLast() == false){
-            item = res.getDouble(res.getColumnIndex(COL_ITEM2));
+        while(!res.isAfterLast()){
+            result_balance = res.getDouble(res.getColumnIndex(COL_ITEM2));
             res.moveToNext();
         }
+        if (result_balance == Double.MIN_VALUE){
+            throw new UserNotFoundException("No balance found.");
+        }
 
-        result_balance = item;
         return result_balance;
     }
 
     //changes the balance in the database
-    public double changeBalance (double transaction_amount, String transaction_type, String userID) {
+    public double changeBalance (double transaction_amount, String transaction_type, String userID) throws UserNotFoundException, DashboardActivity.InsufficientFundsException, DashboardActivity.BalanceLimitExceededException {
         SQLiteDatabase db = this.getWritableDatabase();
-        double wBalance;
-
         double currBalance = getBalance(userID);
 
         if(transaction_type.equals("w")) { //Subtract from curr balance
-
-            if(transaction_amount > currBalance) {
-                return -1;
-            } else {
-                wBalance = currBalance - transaction_amount;
+            double wBalance = currBalance - transaction_amount;
+            if (wBalance < 0) {
+                throw new DashboardActivity.InsufficientFundsException("Less than $" + transaction_amount + " in balance.");
             }
 
             ContentValues values = new ContentValues();
@@ -71,9 +64,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
 
         } else if(transaction_type.equals("d")) { //Add to curr balance
-
+            double dBalance = Double.sum(currBalance, transaction_amount);
+            if (dBalance > DashboardActivity.MAX_BALANCE){
+                throw new DashboardActivity.BalanceLimitExceededException("Depositing $" + transaction_amount + " would exceed max balance allowed.");
+            }
             ContentValues values = new ContentValues();
-            values.put("balance", Double.sum(currBalance, transaction_amount));
+            values.put("balance", dBalance);
             db.update(DB_TABLE, values, "user_id=?", new String[]{userID});
 
         }
@@ -82,7 +78,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Adds the initial user ID and deposit to the database (Only occurs when a user signs up)
-    public double setupAccountInfo(String userId, double initial_deposit){
+    public double setupAccountInfo(String userId, double initial_deposit) throws UserNotFoundException {
         SQLiteDatabase db = this.getWritableDatabase();
 
         // Create a new map of values, where column names are the keys
@@ -101,6 +97,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion == 1) {
             //Code to run if the database version is 1
+        }
+    }
+
+    static class UserNotFoundException extends Exception{
+        UserNotFoundException(String message){
+            super(message);
         }
     }
 }
